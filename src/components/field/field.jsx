@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import './styles.css';
+import './field.css';
 
 class Field extends Component {
     render() {
