@@ -56,6 +56,13 @@ class Settings extends Component {
         if (data.maxRounds) {
             newState.maxRounds = data.maxRounds;
         }
+
+        this.setState(newState);
+        localStorage.removeItem("game_data")
+
+        themes.loadThemes();
+    }
+
     render() {
         return (
             <div>
