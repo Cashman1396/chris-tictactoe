@@ -63,12 +63,74 @@ class Settings extends Component {
         themes.loadThemes();
     }
 
+    changeTheme(themeIndex) {
+
+        switch (themeIndex) {
+            case 0:
+                themes.setTheme(themes.themes_data.dark);
+                break;
+            case 1:
+                themes.setTheme(themes.themes_data.blue);
+                break;
+            default:
+                themes.setTheme(themes.themes_data.dark);
+                break;
+        }
+    }
+
     render() {
-        return (
-            <div>
-                
-            </div>
-        );
+        if (this.state.redirect) {
+            return <Redirect to="/ticTacToe" />
+        } else {
+
+            return (
+                <div className="GameSettings">
+                    <div className="themesSets">
+                        <ul>
+                            <li>
+                                <Button onClick={() => this.changeTheme(0)} value={themes.themes_data.dark.title} />
+                            </li>
+
+                            <li>
+                                <Button onClick={() => this.changeTheme(1)} value={themes.themes_data.blue.title} />
+                            </li>
+
+                        </ul>
+                    </div>
+
+                    <div className="rounds">
+                        <h1>Rounds: </h1>
+                        <ul>
+                            <li>
+                                <Button onClick={() => this.setRounds(1)} value="1" />
+                            </li>
+
+                            <li>
+                                <Button onClick={() => this.setRounds(3)} value="3" />
+                            </li>
+
+                            <li>
+                                <Button onClick={() => this.setRounds(5)} value="5" />
+                            </li>
+                        </ul>
+                    </div>
+                    <div className="players">
+                        <div>
+                            <h1>Player 1: </h1>
+                            <input type="text" placeholder="Name..." className="inputNickname" onChange={(e) => this.setState({ inputP1: e.target.value, nicknameP1: e.target.value })} value={this.state.inputP1} />
+                        </div>
+
+                        <div>
+                            <h1>Player 2: </h1>
+                            <input type="text" placeholder="Name..." className="inputNickname" onChange={(e) => this.setState({ inputP2: e.target.value, nicknameP2: e.target.value })} value={this.state.inputP2} />
+                        </div>
+                    </div>
+                    <div>
+                        <Button onClick={() => this.start()} value="Start!" />
+                    </div>
+                </div>
+            );
+        }
     }
 }
 
