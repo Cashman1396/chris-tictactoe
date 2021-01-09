@@ -5,9 +5,9 @@ import '../../assets/lib/bootstrap.min.css'
 
 import { Redirect, Link } from 'react-router-dom'
 
-import Board from '../../components/board';
-import Field from '../../components/field';
-import Button from '../../components/button';
+import Board from '../../components/board/board';
+import Field from '../../components/field/field';
+import Button from '../../components/button/button';
 
 class Game extends Component {
 
@@ -65,12 +65,207 @@ class Game extends Component {
     }
 
     
+    async make_play(position) {
+
+        if (this.state.gameover) return false;
+        if (this.state.board[position] === '') {
+            const board = this.state.board;
+            board[position] = this.state.symbols.options[this.state.symbols.turn_index];
+            this.setState({ board })
+            const check_winning_sequences_index = this.check_winning_sequences(this.state.symbols.options[this.state.symbols.turn_index])
+            if (check_winning_sequences_index >= 0) {
+                this.setState({ gameover: true })
+
+                const state = this.state;
+
+                const last_round = {
+                    roundNumber: state.game.roundNumber,
+                    winner: {
+                        player: (state.symbols.options[state.symbols.turn_index] === "X") ? 1 : 2,
+                    }
+                }
+
+                const nextGameStatus = game_data.nextRound(last_round);
+                if (nextGameStatus.gameover === true) {
+                    const data = {
+                        title: `Winner: ${(nextGameStatus.winner === 1) ? nextGameStatus.p1.nickname : nextGameStatus.p2.nickname}`,
+                        text: `
+                        <strong>${this.state.game.p1.nickname}</strong>: ${nextGameStatus.p1.score}<br>
+                        <strong>${this.state.game.p2.nickname}</strong>: ${nextGameStatus.p2.score}<br><br>
+
+                        Settings?
+                        
+                        `,
+                        icon: 'success',
+                        confirmText: 'Yes!',
+                        confirmValue: () => this.setState({ redirect: true }),
+                        canceledValue() { }
+                    }
+                    setTimeout(() => this.alert(data), 150);
+                } else {
+                    await game_data.save(nextGameStatus)
+
+                    let timerInterval;
+                    Swal.fire({
+                        title: 'Next round',
+                        html: 'Next round in <b></b> milliseconds.',
+                        timer: 700,
+                        timerProgressBar: true,
+                        onBeforeOpen: () => {
+                            Swal.showLoading()
+                            timerInterval = setInterval(() => {
+                                const content = Swal.getContent()
+                                if (content) {
+                                    const b = content.querySelector('b')
+                                    if (b) {
+                                        b.textContent = Swal.getTimerLeft()
+                                    }
+                                }
+                            }, 100)
+                        },
+                        onClose: () => {
+                            clearInterval(timerInterval)
+                            this.start()
+                        }
+                    }).then((result) => {
+                        /* Read more about handling dismissals below */
+                        if (result.dismiss === Swal.DismissReason.timer) {
+                            // console.log('I was closed by the timer')
+                        }
+                    })
+
+                }
+
+
+
+            } else {
+                this.state.symbols.change();
+                if (this.check_tied()) {
+                    this.setState({ gameover: true })
+
+
+                    const data = {
+                        title: 'We Tied',
+                        text: 'Restart?',
+                        icon: 'info',
+                        confirmText: 'Yes!',
+                        cancelText: 'No!',
+                        confirmValue() { },
+                        canceledValue() { }
+                    }
+
+                    setTimeout(() => this.alert(data), 150);
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+
+    check_winning_sequences(symbol) {
+
+        let returned = -1;
+
+        // eslint-disable-next-line
+        this.state.winning_sequences.map((value, i) => {
+            if (this.state.board[this.state.winning_sequences[i][0]] === symbol &&
+                this.state.board[this.state.winning_sequences[i][1]] === symbol &&
+                this.state.board[this.state.winning_sequences[i][2]] === symbol) {
+                returned = i;
+            }
+        });
+        return returned;
+    }
+
+    // If tied return true
+    check_tied() {
+        let returned = true;
+
+        // eslint-disable-next-line
+        this.state.board.map((value, i) => {
+            if (this.state.board[i] === '') returned = false;
+        });
+        return returned;
+    }
+
+    alert(data) {
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: 'btn btn-success confirmBtn',
+                cancelButton: 'btn btn-secondary cancelBtn'
+            },
+            buttonsStyling: false
+        })
+
+        swalWithBootstrapButtons.fire({
+            title: data.title,
+            html: data.text,
+            icon: data.icon,
+            showCancelButton: (data.cancelText) ? true : false,
+            confirmButtonText: data.confirmText,
+            cancelButtonText: data.cancelText,
+            reverseButtons: true
+        }).then((result) => {
+            if (result.value) {
+                // Accept
+                this.start();
+                data.confirmValue();
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                // Canceled
+                data.canceledValue();
+            }
+
+        })
+    }
+
+    scoreBoard() {
+        const game = game_data.load();
+        alert(`
+            ${game.p1.nickname}: ${game.p1.score}
+            ${game.p2.nickname}: ${game.p2.score}
+        `);
+    }
+
+
+
+
+    start() {
+
+        const symbols = this.state.symbols;
+        let board = this.state.board;
+        symbols.turn_index = Math.round(Math.random(0, 1));
+        board.fill('');
+
+        this.setState({ symbols, board, gameover: false });
+    }
+
+
+
     render() {
-        return (
-            <div>
-                
-            </div>
-        );
+        if (this.state.redirect) {
+            return <Redirect to="/" />
+        } else {
+            return (
+                <div className="Game">
+
+                    <h1 className="player">Turn: {(this.state.symbols.options[this.state.symbols.turn_index] === "X") ? this.state.game.p1.nickname : this.state.game.p2.nickname} ({this.state.symbols.options[this.state.symbols.turn_index]})</h1>
+
+                    <Board>
+                        {this.state.board.map((value, index) =>
+                            <Field key={index} click={() => this.make_play(index)}>{value}</Field>)
+                        }
+                    </Board>
+                    <div className="buttons">
+                        <Link to="/"><Button value="Settings" /></Link>
+                        <Button onClick={() => this.scoreBoard()} value="Score Board" />
+                        <Button onClick={() => this.start()} value="Restart" />
+                    </div>
+                </div>
+            );
+        }
     }
 }
 

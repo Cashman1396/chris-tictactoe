@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom'
 
-import Button from '../../components/button'
+import Button from '../../components/button/button';
 
 import './settings.css'
+
+import { gameData as game_data } from '../../services/data';
+import { themes } from '../../services/theme';
 
 class Settings extends Component {
 

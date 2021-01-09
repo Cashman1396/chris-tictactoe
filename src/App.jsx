@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 
 // Styles
-import './app.css';
+import './App.css';
 
 
 // Components
