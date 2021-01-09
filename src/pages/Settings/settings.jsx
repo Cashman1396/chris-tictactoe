@@ -11,6 +11,7 @@ import { themes } from '../../services/theme';
 class Settings extends Component {
 
     state = {
+
         maxRounds: 1,
 
         redirect: false,
@@ -26,21 +27,20 @@ class Settings extends Component {
 
         this.setRounds = this.setRounds.bind(this);
         this.changeTheme = this.changeTheme.bind(this);
-
     }
 
     setRounds(rounds) {
-        this.setState({maxRounds: rounds});
+        this.setState({ maxRounds: rounds });
     }
 
     async start() {
         const maxRounds = this.state.maxRounds;
         const nicknameP1 = this.state.nicknameP1;
         const nicknameP2 = this.state.nicknameP2;
-        const gameData = await game_data.generateDate(maxRounds, nicknameP1, nicknameP2);
-        await game_data.save(gameData);
-        this.setState({ redirect: true})
 
+        const gameData = await game_data.generateData(maxRounds, nicknameP1, nicknameP2);
+        await game_data.save(gameData);
+        this.setState({ redirect: true });
     }
 
     componentDidMount() {
@@ -61,9 +61,12 @@ class Settings extends Component {
         }
 
         this.setState(newState);
+
         localStorage.removeItem("game_data")
 
+
         themes.loadThemes();
+
     }
 
     changeTheme(themeIndex) {
@@ -79,7 +82,11 @@ class Settings extends Component {
                 themes.setTheme(themes.themes_data.dark);
                 break;
         }
+
     }
+
+
+
 
     render() {
         if (this.state.redirect) {

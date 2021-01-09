@@ -1,4 +1,4 @@
-import { themes_data } from '../assets/themes/themes_data';
+import { themes_data } from '../assets/themes/theme_data';
 
 export const themes = {
 

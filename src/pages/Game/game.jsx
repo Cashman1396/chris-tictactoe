@@ -9,6 +9,9 @@ import Board from '../../components/board/board';
 import Field from '../../components/field/field';
 import Button from '../../components/button/button';
 
+import { gameData as game_data } from '../../services/data';
+import { themes } from '../../services/theme';
+
 class Game extends Component {
 
     state = {

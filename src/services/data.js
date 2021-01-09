@@ -27,6 +27,15 @@ export const gameData = {
         return game_data;
     },
 
+    /*
+    const last_round = {
+        roundNumber: 1
+        winner: {
+            player: 1 | 2
+        },
+    };
+    */
+
     nextRound(last_round) {
         const data = this.load();
         const players_data = {
@@ -41,7 +50,7 @@ export const gameData = {
             }
         };
 
-    
+
         if (Math.trunc(data.maxRounds / 2) < players_data.p1.score || Math.trunc(data.maxRounds / 2) < players_data.p2.score) {
             return {
                 winner: (players_data.p1.score > players_data.p2.score) ? 1 : 2,
@@ -67,5 +76,4 @@ export const gameData = {
         return game_data;
     }
 
-
-}
+};
